@@ -73,7 +73,10 @@ THEME_HOOK_DIR="$HOME/.config/omarchy/hooks/theme-set.d"
 mkdir -p "$THEME_HOOK_DIR"
 cat > "$THEME_HOOK_DIR/99-oio-theme.sh" <<'EOF'
 #!/usr/bin/env bash
-# OIO theme hook - placeholder
+THEME_NAME="$1"
+OIO_CFG="$HOME/.config/oio"
+mkdir -p "$OIO_CFG"
+echo "{\"theme\": \"$THEME_NAME\"}" > "$OIO_CFG/omarchy-theme.json"
 EOF
 chmod +x "$THEME_HOOK_DIR/99-oio-theme.sh"
 
