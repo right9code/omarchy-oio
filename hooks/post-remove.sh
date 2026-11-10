@@ -63,7 +63,27 @@ fi
 OMARCHY_AGENT="/usr/bin/omarchy-agent"
 if [ -f "$OMARCHY_AGENT" ] && grep -q '^oio)$' "$OMARCHY_AGENT"; then
   echo "  - Removing oio dispatcher from $OMARCHY_AGENT (sudo)..."
-  sudo sed -i '/^oio)$/,/^  ;;$/d' "$OMARCHY_AGENT" 2>/dev/null || echo "  (sudo failed; run manually: sudo sed -i '/^oio)$/,/^  ;;$/d' $OMARCHY_AGENT)"
+  _PYTMP=$(mktemp /tmp/oio-remove-dispatcher-XXXXXX.py)
+  cat > "$_PYTMP" <<'PYEOF'
+import sys
+p = sys.argv[1]
+lines = open(p).read().splitlines(keepends=True)
+out = []
+skip = False
+for line in lines:
+    if line.strip() == 'oio)':
+        skip = True
+        continue
+    if skip and line.strip() == ';;':
+        skip = False
+        continue
+    if skip:
+        continue
+    out.append(line)
+open(p, 'w').write(''.join(out))
+print("Dispatcher removed.")
+PYEOF
+  sudo python3 "$_PYTMP" "$OMARCHY_AGENT" && rm -f "$_PYTMP" || { echo "  (sudo failed; run manually: sudo python3 $_PYTMP $OMARCHY_AGENT)"; }
 fi
 
 

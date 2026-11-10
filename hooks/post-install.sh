@@ -1,16 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-echo "=================================================="
-echo "          *** OIO PLUGIN INSTALLATION ***         "
-echo "=================================================="
-echo "Sudo privileges are required to register the dispatcher."
-sudo -v || { echo "Sudo authentication failed. Exiting."; exit 1; }
-
-# Keep sudo alive in the background while the rest runs
-while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-
-echo ""
 echo "[Omarchy OIO] Initializing OIO setup..."
 
 # Check dependencies
@@ -56,29 +46,10 @@ mkdir -p "$HOME/.local/bin"
 ln -sf "$OIO_DIR/dist/cli.mjs" "$HOME/.local/bin/oio"
 echo "[Omarchy OIO] Linked $HOME/.local/bin/oio -> $OIO_DIR/dist/cli.mjs"
 
-# Register dispatcher in /usr/bin/omarchy-agent (sudo cached, no prompt)
-OMARCHY_AGENT="/usr/bin/omarchy-agent"
-if [ -f "$OMARCHY_AGENT" ] && ! grep -q '^oio)$' "$OMARCHY_AGENT"; then
-  echo "[Omarchy OIO] Registering oio dispatcher..."
-  _PYTMP=$(mktemp /tmp/oio-dispatcher-XXXXXX.py)
-  cat > "$_PYTMP" <<'PYEOF'
-import sys
-p = sys.argv[1]
-s = open(p).read()
-block = "oio)\n  command=(oio)\n  [[ -n ${prompt:-} ]] && command+=(\"$prompt\")\n  ;;\n\n"
-marker = "tau)\n"
-if marker in s:
-    s = s.replace(marker, block + marker, 1)
-else:
-    s = s.replace("*)\n  echo \"Unsupported default agent\"", block + "*)\n  echo \"Unsupported default agent\"", 1)
-open(p, "w").write(s)
-print("Dispatcher registered successfully.")
-PYEOF
-  sudo python3 "$_PYTMP" "$OMARCHY_AGENT"
-  rm -f "$_PYTMP"
-  echo "[Omarchy OIO] Dispatcher registered."
-fi
-
+echo ""
+echo "[Omarchy OIO] NOTE: Dispatcher not registered (requires sudo)."
+echo "  Run the sudo command from README.md Part 2 to enable 'omarchy agent'."
+echo ""
 # Set default agent
 mkdir -p "$HOME/.config/omarchy/defaults"
 echo "oio" > "$HOME/.config/omarchy/defaults/agent"
