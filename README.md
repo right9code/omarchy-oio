@@ -10,6 +10,11 @@ Native integration for the [OIO AI Agent](https://github.com/right9code/r9oio) i
 - **Omarchy Theme Sync**: Reacts to Omarchy theme changes via `~/.config/omarchy/hooks/theme-set.d/`.
 - **Dependency Check**: Verifies/installs git, Node.js, npm automatically.
 
+## Installation (Omarchy)
+```bash
+omarchy plugin add https://github.com/right9code/omarchy-oio.git
+```
+
 ## Manual Installation
 ```bash
 chmod +x hooks/post-install.sh
