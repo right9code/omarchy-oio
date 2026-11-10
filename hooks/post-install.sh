@@ -13,6 +13,20 @@ REPO_URL="https://github.com/right9code/r9oio.git"
 
 echo "[Omarchy OIO] Initializing OIO setup..."
 
+# Keep the terminal open on failure so the user can read errors (pym.omadroid pattern).
+pause_before_close() {
+  local status=$?
+  if (( status == 0 )); then
+    echo ""
+    read -rt 10 -p 'Closing in 10 s (Enter closes now).' _ || true
+  else
+    echo ''
+    echo 'Setup did not finish; see the messages above.'
+    read -rp 'Press Enter to close.' _ || true
+  fi
+}
+[[ -t 0 && -t 1 ]] && trap pause_before_close EXIT
+
 # 0. Ask for sudo upfront (cached credentials for dependency install)
 if [ "$EUID" -ne 0 ]; then
   echo "[Omarchy OIO] Requesting sudo for dependency installation (if needed)..."
@@ -127,9 +141,16 @@ omarchy menu refresh 2>/dev/null || true
 #    SUPER+SHIFT+CTRL+A shortcut and `omarchy agent` can launch it.
 OMARCHY_AGENT="/usr/bin/omarchy-agent"
 if [ -f "$OMARCHY_AGENT" ] && ! grep -q '^oio)$' "$OMARCHY_AGENT"; then
-  echo "[Omarchy OIO] Registering oio dispatcher in $OMARCHY_AGENT (sudo)..."
-  echo "(You may be prompted for your sudo password.)"
-  if sudo python3 - "$OMARCHY_AGENT" <<'PY'
+  echo ""
+  echo "========================================"
+  echo "  SUDO REQUIRED: registering oio dispatcher"
+  echo "  in $OMARCHY_AGENT"
+  echo "========================================"
+  echo ""
+  # Write the python script to a temp file so sudo reads the password
+  # from the terminal (not from stdin/heredoc).
+  _PYTMP=$(mktemp /tmp/oio-dispatcher-XXXXXX.py)
+  cat > "$_PYTMP" <<'PY'
 import sys
 p = sys.argv[1]
 s = open(p).read()
@@ -140,18 +161,17 @@ if marker in s:
 else:
     s = s.replace("*)\n  echo \"Unsupported default agent\"", block + "*)\n  echo \"Unsupported default agent\"", 1)
 open(p, "w").write(s)
+print("Dispatcher registered successfully.")
 PY
-  then
+  if sudo python3 "$_PYTMP" "$OMARCHY_AGENT"; then
     echo "[Omarchy OIO] Dispatcher registered."
   else
-    echo "[Omarchy OIO] sudo failed (no TTY or wrong password). Run manually:"
-    echo "  sudo python3 - $OMARCHY_AGENT <<'PY'"
-    echo "  import sys; p=sys.argv[1]; s=open(p).read()"
-    echo "  block='oio)\\n  command=(oio)\\n  [[ -n \${prompt:-} ]] && command+=(\"\$prompt\")\\n  ;;\\n\\n'"
-    echo "  s=s.replace('tau)\\n',block+'tau)\\n',1) if 'tau)\\n' in s else s"
-    echo "  open(p,'w').write(s)"
-    echo "  PY"
+    echo ""
+    echo "[Omarchy OIO] sudo failed. Run this manually in a terminal:"
+    echo "  sudo python3 $_PYTMP $OMARCHY_AGENT"
+    echo "(Then remove $_PYTMP)"
   fi
+  rm -f "$_PYTMP"
 fi
 
 # 9. Add user-level Hyprland shortcut (no sudo) so SUPER+SHIFT+CTRL+A

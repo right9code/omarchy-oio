@@ -10,6 +10,19 @@ DEFAULT_AGENT_FILE="$HOME/.config/omarchy/defaults/agent"
 
 echo "[Omarchy OIO] Executing removal and cleanup..."
 
+pause_before_close() {
+  local status=$?
+  if (( status == 0 )); then
+    echo ""
+    read -rt 5 -p 'Closing in 5 s (Enter closes now).' _ || true
+  else
+    echo ''
+    echo 'Removal did not finish; see the messages above.'
+    read -rp 'Press Enter to close.' _ || true
+  fi
+}
+[[ -t 0 && -t 1 ]] && trap pause_before_close EXIT
+
 # 1. Remove binary stub
 if [ -f "$BIN_STUB" ] || [ -L "$BIN_STUB" ]; then
   rm -f "$BIN_STUB"
