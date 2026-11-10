@@ -15,14 +15,15 @@ echo "[Omarchy OIO] Initializing OIO setup..."
 
 # 0. Ask for sudo upfront (cached credentials for dependency install)
 if [ "$EUID" -ne 0 ]; then
-  echo "[Omarchy OIO] Requesting sudo for dependency installation (if needed)..."
-  sudo -v 2>/dev/null || echo "[Omarchy OIO] sudo not available; dependency auto-install may fail."
+  if [ -t 0 ]; then
+    echo "[Omarchy OIO] Requesting sudo for dependency installation (if needed)..."
+    sudo -v 2>/dev/null || echo "[Omarchy OIO] sudo not available; dependency auto-install may fail."
+  fi
 fi
 
 # 1. Check/install dependencies
 echo "[Omarchy OIO] Checking dependencies..."
 
-# git
 if ! command -v git &> /dev/null; then
   echo "[Omarchy OIO] git not found. Installing..."
   if command -v pacman &> /dev/null; then
@@ -35,7 +36,6 @@ if ! command -v git &> /dev/null; then
   fi
 fi
 
-# node (via mise preferred)
 if ! command -v node &> /dev/null; then
   if command -v mise &> /dev/null; then
     echo "[Omarchy OIO] Installing Node via mise..."
@@ -48,7 +48,6 @@ if ! command -v node &> /dev/null; then
   exit 1
 fi
 
-# npm
 if ! command -v npm &> /dev/null; then
   echo "Error: npm not found (should ship with Node)."
   exit 1
@@ -130,8 +129,9 @@ omarchy menu refresh 2>/dev/null || true
 #    SUPER+SHIFT+CTRL+A shortcut and `omarchy agent` can launch it.
 OMARCHY_AGENT="/usr/bin/omarchy-agent"
 if [ -f "$OMARCHY_AGENT" ] && ! grep -q '^oio)$' "$OMARCHY_AGENT"; then
-  echo "[Omarchy OIO] Registering oio dispatcher in $OMARCHY_AGENT (sudo)..."
-  sudo python3 - "$OMARCHY_AGENT" <<'PY'
+  if [ -t 0 ]; then
+    echo "[Omarchy OIO] Registering oio dispatcher in $OMARCHY_AGENT (sudo)..."
+    sudo python3 - "$OMARCHY_AGENT" <<'PY'
 import sys
 p = sys.argv[1]
 s = open(p).read()
@@ -140,10 +140,19 @@ marker = "tau)\n"
 if marker in s:
     s = s.replace(marker, block + marker, 1)
 else:
-    # fallback: insert before the catch-all *)
-    s = s.replace("*)\n  echo \"Unsupported default agent", block + "*)\n  echo \"Unsupported default agent", 1)
+    s = s.replace("*)\n  echo \"Unsupported default agent\"", block + "*)\n  echo \"Unsupported default agent\"", 1)
 open(p, "w").write(s)
 PY
+  else
+    echo "[Omarchy OIO] No TTY for sudo. Run manually to enable the SUPER+SHIFT+CTRL+A shortcut:"
+    echo "  sudo python3 - $OMARCHY_AGENT <<'PY'"
+    echo "  import sys"
+    echo "  p = sys.argv[1]; s = open(p).read()"
+    echo "  block = 'oio)\\n  command=(oio)\\n  [[ -n \${prompt:-} ]] && command+=(\"\$prompt\")\\n  ;;\\n\\n'"
+    echo "  s = s.replace('tau)\\n', block + 'tau)\\n', 1) if 'tau)\\n' in s else s"
+    echo "  open(p,'w').write(s)"
+    echo "  PY  (pass $OMARCHY_AGENT as the argument)"
+  fi
 fi
 
 # 9. Set OIO as default agent

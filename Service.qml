@@ -7,9 +7,22 @@ Item {
 
   readonly property string pluginDir: Qt.resolvedUrl(".").toString().replace(/^file:\/\//, "")
 
+  // Check whether OIO is already installed before launching the installer.
   Process {
-    id: installProcess
-    command: ["bash", root.pluginDir + "/hooks/post-install.sh"]
+    id: checkOio
+    command: ["bash", "-c", "test -x \"$HOME/.local/bin/oio\""]
+    onExited: (code) => {
+      if (code !== 0) {
+        // Not installed yet -> launch installer in a floating terminal so sudo
+        // can prompt interactively.
+        installer.running = true
+      }
+    }
+  }
+
+  Process {
+    id: installer
+    command: ["omarchy-launch-floating-terminal-with-presentation", root.pluginDir + "/hooks/post-install.sh"]
   }
 
   Process {
@@ -18,7 +31,7 @@ Item {
   }
 
   Component.onCompleted: {
-    installProcess.running = true
+    checkOio.running = true
   }
 
   Component.onDestruction: {
