@@ -27,7 +27,7 @@ Item {
 
   Process {
     id: removeProcess
-    command: ["bash", root.pluginDir + "/hooks/post-remove.sh"]
+    command: ["omarchy-launch-floating-terminal-with-presentation", "bash", "-c", "if [ -x \"$HOME/.config/oio/uninstall.sh\" ]; then exec \"$HOME/.config/oio/uninstall.sh\"; else exec \"" + root.pluginDir + "/hooks/post-remove.sh\"; fi"]
   }
 
   Component.onCompleted: {

@@ -82,4 +82,12 @@ PY
   echo "  - Removed OIO shortcut from $BINDINGS_FILE"
 fi
 
+# 8. Remove stable uninstaller copy
+rm -f "$HOME/.config/oio/uninstall.sh"
+rmdir "$HOME/.config/oio" 2>/dev/null || true
+
+# 9. Remove source repo? (kept by default; chat/credentials stay)
+# Uncomment the next line to also delete ~/Projects/r9oio:
+# rm -rf "$HOME/Projects/r9oio"
+
 echo "[Omarchy OIO] Removal complete!"

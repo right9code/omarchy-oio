@@ -169,7 +169,12 @@ BIND_EOF
   echo "[Omarchy OIO] Added SUPER+SHIFT+CTRL+A shortcut to $BINDINGS_FILE"
 fi
 
-# 10. Set OIO as default agent
+# 10. Install a stable copy of the uninstaller (survives plugin dir deletion)
+mkdir -p "$HOME/.config/oio"
+cp "$PLUGIN_DIR/hooks/post-remove.sh" "$HOME/.config/oio/uninstall.sh"
+chmod +x "$HOME/.config/oio/uninstall.sh"
+
+# 11. Set OIO as default agent
 mkdir -p "$DEFAULTS_DIR"
 echo "oio" > "$DEFAULTS_DIR/agent"
 
