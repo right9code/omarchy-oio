@@ -105,19 +105,6 @@ mkdir -p "$HOME/.config/omarchy/defaults"
 echo "oio" > "$HOME/.config/omarchy/defaults/agent"
 echo "[Omarchy OIO] Default agent set to oio."
 
-# Add Hyprland shortcut binding (user-level, no sudo)
-BINDINGS_FILE="$HOME/.config/hypr/bindings.lua"
-mkdir -p "$HOME/.config/hypr"
-if ! grep -q "right9code.oio" "$BINDINGS_FILE" 2>/dev/null; then
-  cat >> "$BINDINGS_FILE" <<'EOF'
-
--- right9code.oio: launch OIO
--- right9code.oio
-bind = SUPER SHIFT CTRL, A, exec, oio
-EOF
-  echo "[Omarchy OIO] Added shortcut binding (SUPER+SHIFT+CTRL+A)."
-fi
-
 # Create stable uninstaller
 mkdir -p "$HOME/.config/oio"
 cp "$(dirname "$0")/post-remove.sh" "$HOME/.config/oio/uninstall.sh" 2>/dev/null || true

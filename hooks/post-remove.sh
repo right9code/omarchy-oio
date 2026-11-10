@@ -66,29 +66,6 @@ if [ -f "$OMARCHY_AGENT" ] && grep -q '^oio)$' "$OMARCHY_AGENT"; then
   sudo sed -i '/^oio)$/,/^  ;;$/d' "$OMARCHY_AGENT" 2>/dev/null || echo "  (sudo failed; run manually: sudo sed -i '/^oio)$/,/^  ;;$/d' $OMARCHY_AGENT)"
 fi
 
-# 7. Remove user-level Hyprland shortcut (no sudo)
-BINDINGS_FILE="$HOME/.config/hypr/bindings.lua"
-if [ -f "$BINDINGS_FILE" ] && grep -q 'right9code.oio shortcut' "$BINDINGS_FILE"; then
-  python3 - "$BINDINGS_FILE" <<'PY'
-import sys
-p = sys.argv[1]
-lines = open(p).read().splitlines(keepends=True)
-out = []
-inside = False
-for line in lines:
-    if 'right9code.oio shortcut >>>' in line:
-        inside = True
-        continue
-    if 'right9code.oio shortcut <<<' in line:
-        inside = False
-        continue
-    if inside:
-        continue
-    out.append(line)
-open(p, 'w').write(''.join(out))
-PY
-  echo "  - Removed OIO shortcut from $BINDINGS_FILE"
-fi
 
 # 8. Remove stable uninstaller copy
 rm -f "$HOME/.config/oio/uninstall.sh"
