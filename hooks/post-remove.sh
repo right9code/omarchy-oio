@@ -49,13 +49,8 @@ fi
 # 6. Remove oio dispatcher from omarchy-agent (sudo)
 OMARCHY_AGENT="/usr/bin/omarchy-agent"
 if [ -f "$OMARCHY_AGENT" ] && grep -q '^oio)$' "$OMARCHY_AGENT"; then
-  if [ -t 0 ]; then
-    echo "  - Removing oio dispatcher from $OMARCHY_AGENT (sudo)..."
-    sudo sed -i '/^oio)$/,/^  ;;$/d' "$OMARCHY_AGENT" 2>/dev/null || true
-  else
-    echo "  - Skipping sudo dispatcher removal (no TTY). Run manually:"
-    echo "      sudo sed -i '/^oio)$/,/^  ;;$/d' $OMARCHY_AGENT"
-  fi
+  echo "  - Removing oio dispatcher from $OMARCHY_AGENT (sudo)..."
+  sudo sed -i '/^oio)$/,/^  ;;$/d' "$OMARCHY_AGENT" 2>/dev/null || echo "  (sudo failed; run manually: sudo sed -i '/^oio)$/,/^  ;;$/d' $OMARCHY_AGENT)"
 fi
 
 # 7. Remove user-level Hyprland shortcut (no sudo)
