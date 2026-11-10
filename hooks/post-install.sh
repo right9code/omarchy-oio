@@ -155,7 +155,21 @@ PY
   fi
 fi
 
-# 9. Set OIO as default agent
+# 9. Add user-level Hyprland shortcut (no sudo) so SUPER+SHIFT+CTRL+A
+#    launches OIO even if the sudo dispatcher step was skipped.
+BINDINGS_FILE="$HOME/.config/hypr/bindings.lua"
+if [ -f "$BINDINGS_FILE" ] && ! grep -q 'right9code.oio shortcut' "$BINDINGS_FILE"; then
+  cat >> "$BINDINGS_FILE" <<'BIND_EOF'
+
+-- >>> right9code.oio shortcut >>>
+hl.unbind("SUPER + SHIFT + CTRL + A")
+o.bind("SUPER + SHIFT + CTRL + A", "OIO Agent", "omarchy-launch-tui --app-id=org.omarchy.agent oio")
+-- <<< right9code.oio shortcut <<<
+BIND_EOF
+  echo "[Omarchy OIO] Added SUPER+SHIFT+CTRL+A shortcut to $BINDINGS_FILE"
+fi
+
+# 10. Set OIO as default agent
 mkdir -p "$DEFAULTS_DIR"
 echo "oio" > "$DEFAULTS_DIR/agent"
 
