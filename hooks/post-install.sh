@@ -46,7 +46,7 @@ OIO_STABLE="$HOME/.local/share/oio"
 mkdir -p "$OIO_STABLE/dist" "$OIO_STABLE/scripts"
 rm -rf "$OIO_STABLE/dist"/* "$OIO_STABLE/scripts"/*
 cp -r "$OIO_DIR/dist/." "$OIO_STABLE/dist/"
-cp "$OIO_DIR/scripts/verify-deps.mjs" "$OIO_STABLE/scripts/" 2>/dev/null || true
+cp "$OIO_DIR"/scripts/*.mjs "$OIO_STABLE/scripts/" 2>/dev/null || true
 chmod +x "$OIO_STABLE/dist/cli.mjs"
 
 # Link binary to stable location
