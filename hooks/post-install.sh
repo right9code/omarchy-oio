@@ -41,13 +41,11 @@ npm install --ignore-scripts
 echo "[Omarchy OIO] Building OIO..."
 npm run build
 
-# Copy built files to a stable location (so deleting the repo won't break oio)
+# Copy entire repo to a stable location (so deleting ~/Projects/r9oio won't break oio)
+# The bundle needs node_modules at runtime, so we copy everything.
 OIO_STABLE="$HOME/.local/share/oio"
-mkdir -p "$OIO_STABLE/dist" "$OIO_STABLE/scripts"
-rm -rf "$OIO_STABLE/dist"/* "$OIO_STABLE/scripts"/*
-cp -r "$OIO_DIR/dist/." "$OIO_STABLE/dist/"
-cp "$OIO_DIR"/scripts/*.mjs "$OIO_STABLE/scripts/" 2>/dev/null || true
-cp "$OIO_DIR/package.json" "$OIO_STABLE/package.json" 2>/dev/null || true
+rm -rf "$OIO_STABLE"
+cp -r "$OIO_DIR" "$OIO_STABLE"
 chmod +x "$OIO_STABLE/dist/cli.mjs"
 
 # Link binary to stable location
