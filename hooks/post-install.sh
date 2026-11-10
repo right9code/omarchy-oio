@@ -1,21 +1,17 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -e
 
+echo "=================================================="
+echo "          *** OIO PLUGIN INSTALLATION ***         "
+echo "=================================================="
+echo "Sudo privileges are required to register the dispatcher."
+sudo -v || { echo "Sudo authentication failed. Exiting."; exit 1; }
+
+# Keep sudo alive in the background while the rest runs
+while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
+
+echo ""
 echo "[Omarchy OIO] Initializing OIO setup..."
-
-# Keep the terminal open on failure so the user can read errors (pym.omadroid pattern).
-pause_before_close() {
-  local status=$?
-  if (( status == 0 )); then
-    echo ""
-    read -rt 10 -p 'Closing in 10 s (Enter closes now).' _ || true
-  else
-    echo ''
-    echo 'Setup did not finish; see the messages above.'
-    read -rp 'Press Enter to close.' _ || true
-  fi
-}
-[[ -t 0 && -t 1 ]] && trap pause_before_close EXIT
 
 # Check dependencies
 echo "[Omarchy OIO] Checking dependencies..."
@@ -60,17 +56,10 @@ mkdir -p "$HOME/.local/bin"
 ln -sf "$OIO_DIR/dist/cli.mjs" "$HOME/.local/bin/oio"
 echo "[Omarchy OIO] Linked $HOME/.local/bin/oio -> $OIO_DIR/dist/cli.mjs"
 
-# Register dispatcher in /usr/bin/omarchy-agent (requires sudo)
+# Register dispatcher in /usr/bin/omarchy-agent (sudo cached, no prompt)
 OMARCHY_AGENT="/usr/bin/omarchy-agent"
 if [ -f "$OMARCHY_AGENT" ] && ! grep -q '^oio)$' "$OMARCHY_AGENT"; then
-  echo ""
-  echo "================================================"
-  echo "  *** SUDO REQUIRED ***"
-  echo "  Registering oio dispatcher in $OMARCHY_AGENT"
-  echo "  You will be asked for your sudo password."
-  echo "================================================"
-  echo ""
-  echo ""
+  echo "[Omarchy OIO] Registering oio dispatcher..."
   _PYTMP=$(mktemp /tmp/oio-dispatcher-XXXXXX.py)
   cat > "$_PYTMP" <<'PYEOF'
 import sys
@@ -85,17 +74,9 @@ else:
 open(p, "w").write(s)
 print("Dispatcher registered successfully.")
 PYEOF
-  if sudo python3 "$_PYTMP" "$OMARCHY_AGENT"; then
-    echo ""
-    echo "[Omarchy OIO] Dispatcher registered."
-  else
-    echo ""
-    echo "[Omarchy OIO] sudo failed. Run this manually in a terminal:"
-    echo "  sudo python3 $_PYTMP $OMARCHY_AGENT"
-    echo "(Then remove $_PYTMP)"
-    _PYTMP=""
-  fi
-  if [ -n "${_PYTMP:-}" ]; then rm -f "$_PYTMP"; fi
+  sudo python3 "$_PYTMP" "$OMARCHY_AGENT"
+  rm -f "$_PYTMP"
+  echo "[Omarchy OIO] Dispatcher registered."
 fi
 
 # Set default agent
@@ -118,5 +99,7 @@ EOF
 chmod +x "$THEME_HOOK_DIR/99-oio-theme.sh"
 
 echo ""
-echo "[Omarchy OIO] Installation completed successfully!"
+echo "=================================================="
+echo "        Installation completed successfully!      "
+echo "=================================================="
 echo "[Omarchy OIO] Run 'oio --version' to verify."
