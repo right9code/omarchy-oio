@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "right9code.oio",
+  "name": "OIO Agent Integration",
+  "version": "1.0.0",
+  "description": "First-class integration for the OIO AI agent into the Omarchy Quattro desktop environment.",
+  "author": "right9code",
+  "kinds": ["service"],
+  "entryPoints": {
+    "service": "Service.qml"
+  }
+}
