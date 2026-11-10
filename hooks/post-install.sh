@@ -41,10 +41,18 @@ npm install --ignore-scripts
 echo "[Omarchy OIO] Building OIO..."
 npm run build
 
-# Link binary
+# Copy built files to a stable location (so deleting the repo won't break oio)
+OIO_STABLE="$HOME/.local/share/oio"
+mkdir -p "$OIO_STABLE"
+rm -rf "$OIO_STABLE"/*
+cp -r "$OIO_DIR/dist/." "$OIO_STABLE/"
+chmod +x "$OIO_STABLE/cli.mjs"
+
+# Link binary to stable location
 mkdir -p "$HOME/.local/bin"
-ln -sf "$OIO_DIR/dist/cli.mjs" "$HOME/.local/bin/oio"
-echo "[Omarchy OIO] Linked $HOME/.local/bin/oio -> $OIO_DIR/dist/cli.mjs"
+ln -sf "$OIO_STABLE/cli.mjs" "$HOME/.local/bin/oio"
+echo "[Omarchy OIO] Installed to $OIO_STABLE"
+echo "[Omarchy OIO] Linked $HOME/.local/bin/oio -> $OIO_STABLE/cli.mjs"
 
 echo ""
 echo "[Omarchy OIO] NOTE: Dispatcher not registered (requires sudo)."

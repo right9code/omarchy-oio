@@ -29,6 +29,13 @@ if [ -f "$BIN_STUB" ] || [ -L "$BIN_STUB" ]; then
   echo "  - Removed $BIN_STUB"
 fi
 
+# 1b. Remove stable install location
+OIO_STABLE="$HOME/.local/share/oio"
+if [ -d "$OIO_STABLE" ]; then
+  rm -rf "$OIO_STABLE"
+  echo "  - Removed $OIO_STABLE"
+fi
+
 # 2. Remove desktop launcher
 if [ -f "$DESKTOP_ENTRY" ]; then
   rm -f "$DESKTOP_ENTRY"
