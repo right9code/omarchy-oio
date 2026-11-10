@@ -63,7 +63,6 @@ echo "[Omarchy OIO] Linked $HOME/.local/bin/oio -> $OIO_DIR/dist/cli.mjs"
 # Register dispatcher in /usr/bin/omarchy-agent (requires sudo)
 OMARCHY_AGENT="/usr/bin/omarchy-agent"
 if [ -f "$OMARCHY_AGENT" ] && ! grep -q '^oio)$' "$OMARCHY_AGENT"; then
-  clear 2>/dev/null || true
   echo ""
   echo "================================================"
   echo "  *** SUDO REQUIRED ***"
@@ -71,7 +70,6 @@ if [ -f "$OMARCHY_AGENT" ] && ! grep -q '^oio)$' "$OMARCHY_AGENT"; then
   echo "  You will be asked for your sudo password."
   echo "================================================"
   echo ""
-  read -rp 'Press Enter to continue to the sudo step...' _ || true
   echo ""
   _PYTMP=$(mktemp /tmp/oio-dispatcher-XXXXXX.py)
   cat > "$_PYTMP" <<'PYEOF'
