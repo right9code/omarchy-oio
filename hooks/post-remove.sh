@@ -14,18 +14,37 @@ OIO_CFG="$HOME/.config/oio"
 
 echo "[Omarchy OIO] Executing removal and cleanup..."
 
-pause_before_close() {
+# Recursion / re-entry guard (must run before any trap setup).
+LOCK="$OIO_CFG/.uninstalling"
+if [ -f "$LOCK" ]; then
+  exit 0
+fi
+mkdir -p "$OIO_CFG" 2>/dev/null || true
+touch "$LOCK" 2>/dev/null || true
+
+cleanup() {
   local status=$?
-  if (( status == 0 )); then
-    echo ""
-    read -rt 5 -p 'Closing in 5 s (Enter closes now).' _ || true
-  else
-    echo ''
-    echo 'Removal did not finish; see the messages above.'
-    read -rp 'Press Enter to close.' _ || true
+  rm -f "$LOCK" 2>/dev/null || true
+  if [[ -t 0 && -t 1 ]]; then
+    if (( status == 0 )); then
+      echo ""
+      read -rt 5 -p 'Closing in 5 s (Enter closes now).' _ || true
+    else
+      echo ''
+      echo 'Removal did not finish; see the messages above.'
+      read -rp 'Press Enter to close.' _ || true
+    fi
   fi
 }
-[[ -t 0 && -t 1 ]] && trap pause_before_close EXIT
+trap cleanup EXIT
+
+# 0. Order-agnostic: if the plugin is still installed, unload it via Omarchy CLI
+# (also unloads it from the running shell). Safe to call repeatedly.
+PLUGIN_DIR="$HOME/.config/omarchy/plugins/right9code.oio"
+if [ -d "$PLUGIN_DIR" ]; then
+  echo "  - Unloading Omarchy shell plugin..."
+  omarchy plugin remove right9code.oio --yes 2>/dev/null || true
+fi
 
 # 1. Remove binary stub
 if [ -f "$BIN_STUB" ] || [ -L "$BIN_STUB" ]; then
@@ -117,8 +136,15 @@ if [ -f "$STABLE_DISPATCHER" ]; then
   echo "  - Removed stable dispatcher copy"
 fi
 
-# 8. Remove stable uninstaller copy
+# 8. Remove oio-uninstall command
+if [ -e "$HOME/.local/bin/oio-uninstall" ] || [ -L "$HOME/.local/bin/oio-uninstall" ]; then
+  rm -f "$HOME/.local/bin/oio-uninstall"
+  echo "  - Removed oio-uninstall command"
+fi
+
+# 9. Remove stable uninstaller copy
 rm -f "$OIO_CFG/uninstall.sh"
+rm -f "$OIO_CFG/.uninstalling" 2>/dev/null || true
 rmdir "$OIO_CFG" 2>/dev/null || true
 
 echo "[Omarchy OIO] Removal complete!"

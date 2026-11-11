@@ -85,6 +85,9 @@ if [[ "$REGISTER_ONLY" != "true" ]]; then
   mkdir -p "$OIO_CFG"
   cp "$PLUGIN_DIR/hooks/post-remove.sh" "$OIO_CFG/uninstall.sh" 2>/dev/null || true
   chmod +x "$OIO_CFG/uninstall.sh" 2>/dev/null || true
+  mkdir -p "$BIN_DIR"
+  ln -sf "$OIO_CFG/uninstall.sh" "$BIN_DIR/oio-uninstall"
+  echo "  - Installed oio-uninstall command."
   cp "$DISPATCHER_SCRIPT" "$STABLE_DISPATCHER" 2>/dev/null || true
   chmod +x "$STABLE_DISPATCHER" 2>/dev/null || true
 
@@ -186,5 +189,10 @@ mkdir -p "$POST_UPDATE_DIR"
 cp "$PLUGIN_DIR/hooks/post-update-agent-dispatcher.sh" "$POST_UPDATE_DIR/99-oio-agent-dispatcher.sh" 2>/dev/null || true
 chmod +x "$POST_UPDATE_DIR/99-oio-agent-dispatcher.sh" 2>/dev/null || true
 echo "  - Post-update hook installed."
+
+# 5. oio-uninstall command (idempotent)
+mkdir -p "$BIN_DIR"
+ln -sf "$OIO_CFG/uninstall.sh" "$BIN_DIR/oio-uninstall" 2>/dev/null || true
+echo "  - oio-uninstall command registered."
 
 echo "[Omarchy OIO] Registration complete."
