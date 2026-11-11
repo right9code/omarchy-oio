@@ -15,7 +15,9 @@ fi
 
 # Elevate before any write to the system file.
 if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
-  exec sudo bash "$0" "$@"
+  # pkexec uses a graphical auth dialog, so it works even when this script
+  # runs from omarchy's floating terminal (no usable tty for sudo).
+  exec pkexec bash "$0" "$@"
 fi
 
 echo "  - Registering/updating oio dispatcher in $OMARCHY_AGENT..."

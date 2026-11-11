@@ -104,7 +104,7 @@ for line in lines:
 open(p, 'w').write(''.join(out))
 print("Dispatcher removed.")
 PYEOF
-  sudo python3 "$_PYTMP" "$OMARCHY_AGENT" && rm -f "$_PYTMP" || { echo "  (sudo failed; run manually: sudo python3 $_PYTMP $OMARCHY_AGENT)"; }
+  pkexec python3 "$_PYTMP" "$OMARCHY_AGENT" && rm -f "$_PYTMP" || { echo "  (pkexec failed; run manually: pkexec python3 $_PYTMP $OMARCHY_AGENT)"; }
 fi
 
 # 7. Remove post-update hook and stable dispatcher copy
