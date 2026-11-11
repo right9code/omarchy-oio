@@ -162,7 +162,7 @@ DESKTOP_EOF
 update-desktop-database "$APPS_DIR" 2>/dev/null || true
 echo "  - Desktop entry registered."
 
-# 3. Dispatcher registration (pkexec; non-interactive sudo -n attempt in --register-only mode)
+# 3. Dispatcher registration (sudo; non-interactive sudo -n attempt in --register-only mode)
 OMARCHY_AGENT="/usr/bin/omarchy-agent"
 if [[ -f "$OMARCHY_AGENT" ]]; then
   if grep -q 'command=(oio)$' "$OMARCHY_AGENT"; then
