@@ -9,37 +9,19 @@ Native integration for the [OIO AI Agent](https://github.com/right9code/r9oio) i
 - **Shortcut Support**: Triggers via `SUPER + SHIFT + CTRL + A` or `omarchy agent`.
 - **Omarchy Theme Sync**: Reacts to Omarchy theme changes via `~/.config/omarchy/hooks/theme-set.d/`.
 - **Dependency Check**: Verifies/installs git, Node.js, npm automatically.
+- **Auto-registration**: The install registers OIO with Omarchy automatically (menu entry, desktop launcher, agent dispatcher, and a post-update hook that keeps the dispatcher alive across Omarchy package updates).
 
 ## Installation (Omarchy)
 
-### Part 1: Install OIO (no sudo required)
 ```bash
 omarchy plugin add https://github.com/right9code/omarchy-oio.git --enable
 ```
-This clones, builds, and links OIO. The floating terminal will show progress.
 
-### Part 2: Register dispatcher (requires sudo)
-After Part 1 completes, run this in your terminal:
-```bash
-sudo python3 -c "
-p='/usr/bin/omarchy-agent'
-lines=open(p).read().splitlines(keepends=True)
-out=[]; skip=False
-for l in lines:
-    if l.strip()=='oio)': skip=True; continue
-    if skip and l.strip()==';;': skip=False; continue
-    if skip: continue
-    out.append(l)
-# Insert oio case before tau case
-block='oio)\n  command=(oio)\n  [[ -n \${prompt:-} ]] && command+=(\"\$prompt\")\n  ;;\n\n'
-marker='tau)\n'
-text=''.join(out)
-if marker in text:
-    text=text.replace(marker, block+marker, 1)
-open(p,'w').write(text)
-print('Dispatcher registered.')
-"
-```
+This clones, builds, and links OIO. The floating terminal shows progress and
+registers OIO with Omarchy automatically. The install patches `/usr/bin/omarchy-agent`
+(adds an `oio)` case) so `omarchy agent` and the `SUPER + SHIFT + CTRL + A`
+shortcut work out of the box; `pacman -Qkk omarchy` will report that file as
+modified, which is expected.
 
 ## Manual Installation
 ```bash

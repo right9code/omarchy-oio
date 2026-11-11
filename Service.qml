@@ -7,6 +7,13 @@ Item {
 
   readonly property string pluginDir: Qt.resolvedUrl(".").toString().replace(/^file:\/\//, "")
 
+  // Light, idempotent registration (menu entry, desktop entry, dispatcher check).
+  // Runs on every load so a half-finished or stale install repairs itself.
+  Process {
+    id: registerProcess
+    command: ["bash", root.pluginDir + "/hooks/post-install.sh", "--register-only"]
+  }
+
   // Check whether OIO is already installed before launching the installer.
   Process {
     id: checkOio
@@ -32,6 +39,7 @@ Item {
 
   Component.onCompleted: {
     checkOio.running = true
+    registerProcess.running = true
   }
 
   Component.onDestruction: {
