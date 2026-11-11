@@ -31,17 +31,26 @@ chmod +x hooks/post-install.sh
 
 ## Uninstallation
 
-One command removes everything (artifacts, plugin, and the command itself):
+Omarchy's plugin system does not run uninstall hooks, so a full removal needs one
+manual step in addition to `omarchy plugin remove`. Two equivalent methods:
+
+### Method 1 — one command (recommended)
 
 ```bash
 oio-uninstall
 ```
 
-`oio-uninstall` is order-agnostic: if the plugin is still installed it unloads it
-via `omarchy plugin remove` for you, then cleans all artifacts outside the plugin
- dir (binary, stable install, menu entry, theme hook, dispatcher case, post-update
-hook) and removes itself. Omarchy's plugin system does not run uninstall hooks,
-so this manual step is required for a full removal.
+Order-agnostic: if the plugin is still installed it unloads it via
+`omarchy plugin remove` for you, then cleans every artifact outside the plugin dir
+(binary, stable install, menu entry, theme hook, dispatcher case, post-update hook)
+and removes the `oio-uninstall` command itself. Nothing is left behind.
 
-If you already ran `omarchy plugin remove right9code.oio --yes` first, the
-uninstaller is still available at `~/.config/oio/uninstall.sh` until you run it.
+### Method 2 — two steps (if you already removed the plugin)
+
+```bash
+omarchy plugin remove right9code.oio --yes
+~/.config/oio/uninstall.sh
+```
+
+The uninstaller persists at `~/.config/oio/uninstall.sh` until you run it, so
+this works even after `omarchy plugin remove` has already deleted the plugin dir.
